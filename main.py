@@ -3,9 +3,7 @@
 
 import logging
 import os
-from typing import Optional
 from fastapi import FastAPI
-from pydantic import BaseModel
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from utils import mail_trigger
@@ -13,6 +11,7 @@ import threading
 from dotenv import load_dotenv
 import pika
 import json
+from models import EmailSchema
 
 load_dotenv('.env')
 
@@ -29,15 +28,6 @@ html = """
         </body>
     </html>
 """
-
-
-class EmailSchema(BaseModel):
-    email_to: str
-    cc: Optional[str] = ""
-    bcc: Optional[str] = ""
-    subject: str
-    template: str
-    template_data: dict
 
 
 def consume_from_rabbitmq():
@@ -86,7 +76,7 @@ def handle_user_registration(user_data, email):
             'message': message,
             'server': host,
         }
-        breakpoint()
+
         t = threading.Thread(target=mail_trigger, args=[email_args])
         t.start()
 
